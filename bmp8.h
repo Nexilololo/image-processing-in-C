@@ -1,6 +1,6 @@
 #ifndef BMP8_H
 #define BMP8_H
-
+#include <stdio.h>
 typedef struct{
     unsigned char header[54];
     unsigned char colorTable[1024];
