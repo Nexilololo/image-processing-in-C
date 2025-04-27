@@ -124,3 +124,44 @@ void bmp8_threshold(t_bmp8 * img, int threshold) {
         img->data[i] = (img->data[i] >= threshold) ? 255 : 0;
     }
 }
+
+void bmp8_applyFilter(t_bmp8 * img, double * kernel, int kernelSize) {
+    if (!img || !img->data || !kernel || kernelSize <= 0 || kernelSize % 2 == 0) return;
+
+    unsigned int width = img->width;
+    unsigned int height = img->height;
+    unsigned char *newData = (unsigned char *)malloc(img->dataSize);
+    if (!newData) {
+        perror("Error allocating memory for filtered data");
+        return;
+    }
+
+    int kernelOffset = kernelSize / 2;
+
+    for (unsigned int y = 0; y < height; y++) {
+        for (unsigned int x = 0; x < width; x++) {
+            double sum = 0.0;
+            for (int ky = -kernelOffset; ky <= kernelOffset; ky++) {
+                for (int kx = -kernelOffset; kx <= kernelOffset; kx++) {
+                    int sampleX = x + kx;
+                    int sampleY = y + ky;
+
+                    // Basic edge handling (clamping)
+                    if (sampleX < 0) sampleX = 0;
+                    if (sampleX >= width) sampleX = width - 1;
+                    if (sampleY < 0) sampleY = 0;
+                    if (sampleY >= height) sampleY = height - 1;
+
+                    sum += img->data[sampleY * width + sampleX] *
+                           kernel[(ky + kernelOffset) * kernelSize + (kx + kernelOffset)];
+                }
+            }
+            newData[y * width + x] = (unsigned char)fmax(0.0, fmin(255.0, sum));
+        }
+    }
+
+    // Safely update the image data
+    free(img->data);
+    img->data = newData;
+    newData = NULL; // Prevent double free
+}
