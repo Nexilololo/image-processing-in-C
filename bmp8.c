@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bmp8.h"
-#include <math.h> // For fmod
+#include <math.h>
 
 t_bmp8 * bmp8_loadImage(const char * filename) {
     FILE *file = fopen(filename, "rb");
@@ -17,16 +17,13 @@ t_bmp8 * bmp8_loadImage(const char * filename) {
         return NULL;
     }
 
-    // Read the BMP header
     fread(img->header, 1, 54, file);
 
-    // Extract image information
     img->width = *(unsigned int *)&img->header[18];
     img->height = *(unsigned int *)&img->header[22];
     img->colorDepth = *(unsigned short *)&img->header[28];
     img->dataSize = *(unsigned int *)&img->header[34];
 
-    // Check if it's an 8-bit image
     if (img->colorDepth != 8) {
         fprintf(stderr, "Error: Not an 8-bit grayscale image\n");
         fclose(file);
@@ -34,10 +31,8 @@ t_bmp8 * bmp8_loadImage(const char * filename) {
         return NULL;
     }
 
-    // Read the color table (1024 bytes for 8-bit)
     fread(img->colorTable, 1, 1024, file);
 
-    // Allocate memory for image data
     img->data = (unsigned char *)malloc(img->dataSize);
     if (!img->data) {
         perror("Error allocating memory for pixel data");
@@ -46,7 +41,6 @@ t_bmp8 * bmp8_loadImage(const char * filename) {
         return NULL;
     }
 
-    // Read the pixel data
     fread(img->data, 1, img->dataSize, file);
 
     fclose(file);
@@ -60,13 +54,10 @@ void bmp8_saveImage(const char * filename, t_bmp8 * img) {
         return;
     }
 
-    // Write the BMP header
     fwrite(img->header, 1, 54, file);
 
-    // Write the color table
     fwrite(img->colorTable, 1, 1024, file);
 
-    // Write the pixel data
     fwrite(img->data, 1, img->dataSize, file);
 
     fclose(file);
@@ -87,7 +78,6 @@ void bmp8_printInfo(t_bmp8 * img) {
         printf("Image is NULL\n");
         return;
     }
-
     printf("Width: %u\n", img->width);
     printf("Height: %u\n", img->height);
     printf("Color Depth: %u\n", img->colorDepth);
@@ -95,8 +85,9 @@ void bmp8_printInfo(t_bmp8 * img) {
 }
 
 void bmp8_negative(t_bmp8 * img) {
-    if (!img || !img->data) return;
-
+    if (!img || !img->data) {
+        return;
+    }
     for (unsigned int i = 0; i < img->dataSize; i++) {
         img->data[i] = 255 - img->data[i];
     }
@@ -118,16 +109,18 @@ void bmp8_brightness(t_bmp8 * img, int value) {
 }
 
 void bmp8_threshold(t_bmp8 * img, int threshold) {
-    if (!img || !img->data) return;
-
+    if (!img || !img->data) {
+        return;
+    }
     for (unsigned int i = 0; i < img->dataSize; i++) {
         img->data[i] = (img->data[i] >= threshold) ? 255 : 0;
     }
 }
 
 void bmp8_applyFilter(t_bmp8 * img, double * kernel, int kernelSize) {
-    if (!img || !img->data || !kernel || kernelSize <= 0 || kernelSize % 2 == 0) return;
-
+    if (!img || !img->data || !kernel || kernelSize <= 0 || kernelSize % 2 == 0) {
+        return;
+    }
     unsigned int width = img->width;
     unsigned int height = img->height;
     unsigned char *newData = (unsigned char *)malloc(img->dataSize);
@@ -146,22 +139,28 @@ void bmp8_applyFilter(t_bmp8 * img, double * kernel, int kernelSize) {
                     int sampleX = x + kx;
                     int sampleY = y + ky;
 
-                    // Basic edge handling (clamping)
-                    if (sampleX < 0) sampleX = 0;
-                    if (sampleX >= width) sampleX = width - 1;
-                    if (sampleY < 0) sampleY = 0;
-                    if (sampleY >= height) sampleY = height - 1;
+                    if (sampleX < 0) {
+                        sampleX = 0;
+                    }
+                    if (sampleX >= width) {
+                        sampleX = width - 1;
+                    }
+                    if (sampleY < 0) {
+                        sampleY = 0;
+                    }
+                    if (sampleY >= height) {
+                        sampleY = height - 1;
+                    }
 
-                    sum += img->data[sampleY * width + sampleX] *
-                           kernel[(ky + kernelOffset) * kernelSize + (kx + kernelOffset)];
+                    sum += img->data[sampleY * width + sampleX] * kernel[(ky + kernelOffset) * kernelSize + (kx + kernelOffset)];
                 }
             }
             newData[y * width + x] = (unsigned char)fmax(0.0, fmin(255.0, sum));
         }
     }
 
-    // Safely update the image data
+    // To update the image data
     free(img->data);
     img->data = newData;
-    newData = NULL; // Prevent double free
+    newData = NULL; // To prevent freeing two times
 }
