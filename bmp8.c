@@ -35,7 +35,7 @@ t_bmp8 * bmp8_loadImage(const char * filename) {
 
     img->data = (unsigned char *)malloc(img->dataSize);
     if (!img->data) {
-        printf("Error allocating memory for pixel data");
+        printf("Error while allocating memory for pixel data");
         fclose(file);
         free(img);
         return NULL;
@@ -50,7 +50,7 @@ t_bmp8 * bmp8_loadImage(const char * filename) {
 void bmp8_saveImage(const char * filename, t_bmp8 * img) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
-        printf("Error opening file for writing");
+        printf("Error while opening file for writing");
         return;
     }
 
@@ -125,7 +125,7 @@ void bmp8_applyFilter(t_bmp8 * img, double * kernel, int kernelSize) {
     unsigned int height = img->height;
     unsigned char *newData = (unsigned char *)malloc(img->dataSize);
     if (!newData) {
-        printf("Error allocating memory for filtered data");
+        printf("Error while allocating memory for filtered data");
         return;
     }
 

@@ -6,13 +6,13 @@
 t_bmp24 * bmp24_loadImage(const char * filename) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
-        printf("Error opening file");
+        printf("Error while opening file");
         return NULL;
     }
 
     t_bmp24 *img = (t_bmp24 *)malloc(sizeof(t_bmp24));
     if (!img) {
-        printf("Error allocating memory for image");
+        printf("Error while allocating memory for image");
         fclose(file);
         return NULL;
     }
@@ -37,7 +37,7 @@ t_bmp24 * bmp24_loadImage(const char * filename) {
     // Allocate memory for image data
     img->data = (unsigned char *)malloc(img->dataSize);
     if (!img->data) {
-        printf("Error allocating memory for pixel data");
+        printf("Error while allocating memory for pixel data");
         fclose(file);
         free(img);
         return NULL;
@@ -53,7 +53,7 @@ t_bmp24 * bmp24_loadImage(const char * filename) {
 void bmp24_saveImage(const char * filename, t_bmp24 * img) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
-        printf("Error opening file for writing");
+        printf("Error while opening file for writing");
         return;
     }
 
